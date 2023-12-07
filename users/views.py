@@ -1,11 +1,14 @@
-import jwt
-from rest_framework.views import APIView
-from datetime import datetime, timedelta
 from rest_framework.generics import ListCreateAPIView, RetrieveUpdateDestroyAPIView
 from rest_framework import status
+from rest_framework.views import APIView
 from rest_framework.views import Response
+
+from _core.permissions import IsAuthenticated
 from users.models import User
 from .serializers import UserSerializer, AuthSerializer
+
+import jwt
+from datetime import datetime, timedelta
 from django.contrib.auth.hashers import make_password, check_password
 
 class UserView(ListCreateAPIView):
@@ -20,6 +23,8 @@ class UserView(ListCreateAPIView):
 class UserDetailView(RetrieveUpdateDestroyAPIView):
 	queryset = User.objects.all()
 	serializer_class = UserSerializer
+	permission_classes = [IsAuthenticated]
+
 
 class UserAuthView(APIView):
 	def post(self, request, *args, **kwargs):
@@ -46,5 +51,5 @@ class UserAuthView(APIView):
 			'email': user.email,
 			'exp': datetime.utcnow() + timedelta(days=1),
 		}
-		token = jwt.encode(payload, 'tome', algorithm='HS256')
+		token = jwt.encode(payload, 'secret', algorithm='HS256')
 		return token
