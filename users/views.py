@@ -1,11 +1,11 @@
-from rest_framework.generics import ListCreateAPIView, RetrieveUpdateDestroyAPIView
+from rest_framework.generics import CreateAPIView, ListCreateAPIView, RetrieveUpdateDestroyAPIView
 from rest_framework import status
 from rest_framework.views import APIView
 from rest_framework.views import Response
 
-from _core.permissions import IsAuthenticated
+from _core.permissions import IsAuthenticated, IsAdmin
 from users.models import User
-from .serializers import UserSerializer, AuthSerializer
+from .serializers import UserSerializer, SuperUserSerializer, AuthSerializer
 
 import jwt
 from datetime import datetime, timedelta
@@ -25,6 +25,15 @@ class UserDetailView(RetrieveUpdateDestroyAPIView):
 	serializer_class = UserSerializer
 	permission_classes = [IsAuthenticated]
 
+class SuperUserView(CreateAPIView):
+	queryset = User.objects.all()
+	serializer_class = SuperUserSerializer
+	permission_classes = [IsAuthenticated, IsAdmin]
+
+	def create(self, request, *args, **kwargs):
+		p = request.data['password']
+		request.data['password'] = make_password(p)
+		return super().create(request, *args, **kwargs)
 
 class UserAuthView(APIView):
 	def post(self, request, *args, **kwargs):

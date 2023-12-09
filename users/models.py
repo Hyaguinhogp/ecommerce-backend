@@ -9,3 +9,4 @@ class User(models.Model):
     password = models.CharField(max_length=500)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateField(auto_now=True)
+    is_superuser = models.BooleanField(default=False)
